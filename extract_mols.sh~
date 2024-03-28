@@ -1,0 +1,98 @@
+#!/bin/bash
+
+get_tranch() {
+    
+   # Inputs: TRANCH : str example : "H21M000"
+   # 	    OUTPUT_DIR : str example : "~/foo/fun/"
+   #	    DESIRED_TYPE : str example : "sdf",  "db2", "smi"
+   
+    TRANCH=${1}
+    OUTPUT_DIR=${2}
+    DESIRED_TYPE=${3}
+    
+    ATOM_COUNT=${TRANCH:1:2}
+    LOGP=${TRANCH:4:3}
+
+    if [ "${DESIRED_TYPE}" = "db2" ] || [ "${DESIRED_TYPE}" = "sdf" ]; then
+	echo "GRABBING: ${DESIRED_TYPE} in ${TRANCH}..."
+	for ZINC_LETTER_TRANCH in zinc-22* ; do
+	    echo "DEBUGGING: ${ZINC_LETTER_TRANCH}"
+	    for ZINC_2D_TRANCH in ${ZINC_LETTER_TRANCH}/"H${ATOM_COUNT}"/* ; do
+		echo "DEBUGGING: ${ZINC_2D_TRANCH}"
+		BASE_2D=$(basename "${ZINC_2D_TRANCH}" )
+		if [ "${BASE_2D}" = "${TRANCH}" ]; then
+		    echo "DEBUGGING: TRANCH MATCH!"
+		    for DIR in ${ZINC_2D_TRANCH}/* ; do
+			echo "DEBUGGING: ${DIR}"
+			if [ -d "${DIR}" ]; then
+			    for FILE in ${DIR}/*".${DESIRED_TYPE}.tgz"; do
+				echo " mv ${FILE} ${OUTPUT_DIR}"
+				mv ${FILE} ${OUTPUT_DIR}
+			    done
+			fi      
+		    done		
+		fi
+	    done
+	done
+    fi
+	
+    if [ "${DESIRED_TYPE}" = "smi" ]; then
+	for ZINC_LETTER_TRANCH in zinc-22* ; do
+	    for ZINC_2D_TRANCH in ${ZINC_LETTER_TRANCH}/"H${ATOM_COUNT}"/*; do
+#		echo "${ZINC_2D_TRANCH}"
+		BASE_2D=$(basename "${ZINC_2D_TRANCH}" )
+		if [ "${BASE_2D}" = "${TRANCH}" ]; then
+#		    echo "HIT HIT HIT"
+		    for FILE in ${ZINC_2D_TRANCH}/*.gz; do
+#			echo " mv ${FILE} ${OUTPUT_DIR}"
+			mv ${FILE} ${OUTPUT_DIR}
+                    done
+		fi
+	    done
+	done
+    fi
+}
+
+main () {
+    
+    #usage: extract_mols.sh heavy_atom_start heavy_atom_end logp_start logp_end 
+   # 	   desired_type /path/to/output 
+    HEAVY_ATOM_START=${1}
+    HEAVY_ATOM_END=${2}
+    LOGP_START=${3}
+    LOGP_END=${4}
+    OUTPUT_DIR=${6}
+    DESIRED_TYPE=${5}
+
+    if [ "${DESIRED_TYPE}" != "sdf" ] && \
+	   [ "${DESIRED_TYPE}" != "db2" ] && \
+	   [ "${DESIRED_TYPE}" != "smi" ]; then
+	echo "ERROR: DESIRED_TYPE must be sdf, db2, or smi"
+	exit 1
+    fi
+
+    mkdir -p ${OUTPUT_DIR}
+    
+    for ((HEAVY_VAL=${HEAVY_ATOM_START} ; HEAVY_VAL<=${HEAVY_ATOM_END} ; HEAVY_VAL++  )); do
+	for (( LOGP_VAL=${LOGP_START} ; LOGP_VAL<=${LOGP_END} ; LOGP_VAL = LOGP_VAL + 10)); do
+	    FORMATTED_PVAL=$(printf "%03d" "${LOGP_VAL}")
+	    TRANCH="H${HEAVY_VAL}P${FORMATTED_PVAL}"
+	    echo ${TRANCH}
+	    get_tranch ${TRANCH} ${OUTPUT_DIR} ${DESIRED_TYPE}
+	    TRANCH="H${HEAVY_VAL}M${FORMATTED_PVAL}"
+	    get_tranch ${TRANCH} ${OUTPUT_DIR} ${DESIRED_TYPE}
+	done
+    done
+    
+}
+echo "usage: extract_mols.sh heavy_atom_start heavy_atom_end logp_start logp_end desired_type /path/to/output"
+HEAVY_ATOM_START=${1}
+HEAVY_ATOM_END=${2}
+LOGP_START=${3}
+LOGP_END=${4}
+OUTPUT_DIR=${6}
+DESIRED_TYPE=${5}
+
+main ${HEAVY_ATOM_START} ${HEAVY_ATOM_END} ${LOGP_START} ${LOGP_END} \
+     ${DESIRED_TYPE} \
+     ${OUTPUT_DIR}

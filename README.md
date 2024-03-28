@@ -66,13 +66,14 @@ Step By Step Guide:
    #example usage
    bash ../extract_mols.sh 21 21 300 400 sdf ../output_sdf_files
 
-   the extract_mols.sh script will automatically iterate the untar zinc-22
-   directories and mv every compound that falls within the Heavy Atom count and
-   log P rance specified into the specified output_directory.
+   the extract_mols.sh script will automatically iterate the untar'd zinc-22
+   directories and move every compound that falls within the Heavy Atom count and
+   log P range specified into the specified output_directory.
    currently there are three supported file types: "db2" "smi" "sdf"
 
    if sdf or db2 are selected, files moved into this directory will be .tgz
    compressed.
+   
 4. After you're desired files are moved into the specified output directly feel
    free to remove leftover files you do not need or if tar balls are untar'd in
    the /scratch/ directory they will be deleted automatically after a period of time
