@@ -28,7 +28,11 @@ if [ -z ${ZINC_MIRROR_BASE+x} ]; then
     exit 1
 fi
 
-
+if ! command -v globus &> /dev/null; then
+    echo "ERROR: globus-cli is not available. Please ensure it is installed and loaded."
+    echo "If you are on greatlakes, you can load it with 'module load globus-cli'"
+    exit 1
+fi
 TRANCHES_PATH=$1
 
 echo "######################"
