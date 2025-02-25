@@ -9,24 +9,26 @@ get_tranch() {
     TRANCH=${1}
     OUTPUT_DIR=${2}
     DESIRED_TYPE=${3}
-    
+    echo "desired tranch is ${TRANCH}"
     ATOM_COUNT=${TRANCH:1:2}
     LOGP=${TRANCH:4:3}
 
     if [ "${DESIRED_TYPE}" = "db2" ] || [ "${DESIRED_TYPE}" = "sdf" ]; then
-#	echo "GRABBING: ${DESIRED_TYPE} in ${TRANCH}..."
+	pwd
+	echo "GRABBING: ${DESIRED_TYPE} in ${TRANCH}..."
 	for ZINC_LETTER_TRANCH in zinc-22* ; do
-#	    echo "DEBUGGING: ${ZINC_LETTER_TRANCH}"
+	    echo "DEBUGGING: ZINC_LETTER_TRANCH ${ZINC_LETTER_TRANCH}"
 	    for ZINC_2D_TRANCH in ${ZINC_LETTER_TRANCH}/"H${ATOM_COUNT}"/* ; do
-#		echo "DEBUGGING: ${ZINC_2D_TRANCH}"
+		echo "DEBUGGING: ZINC_2D_TRANCH ${ZINC_2D_TRANCH}"
 		BASE_2D=$(basename "${ZINC_2D_TRANCH}" )
-		if [ "${BASE_2D}" = "${TRANCH}" ]; then
-#		    echo "DEBUGGING: TRANCH MATCH!"
+		echo "DEBUGGING: BASE_2D ${BASE_2D}"
+		if [[ "${BASE_2D}" = "${TRANCH}" ]]; then
+		    echo "DEBUGGING: TRANCH MATCH!"
 		    for DIR in ${ZINC_2D_TRANCH}/* ; do
-#			echo "DEBUGGING: ${DIR}"
+			echo "DEBUGGING: DIR is ${DIR}"
 			if [ -d "${DIR}" ]; then
 			    for FILE in ${DIR}/*".${DESIRED_TYPE}.tgz"; do
-#				echo " mv ${FILE} ${OUTPUT_DIR}"
+				echo " copying ${FILE} to ${OUTPUT_DIR}"
 				cp ${FILE} ${OUTPUT_DIR}
 			    done
 			fi      
@@ -54,7 +56,10 @@ get_tranch() {
 }
 
 main () {
-    
+    if [ -z "${DESTINATION_PATH}" ]; then
+   		echo "DESTINATION_PATH is not set. Please run setup_environment.sh..."
+    	exit 1
+	fi
     #usage: extract_mols.sh heavy_atom_start heavy_atom_end logp_start logp_end 
    # 	   desired_type /path/to/output 
     HEAVY_ATOM_START=${1}
@@ -140,7 +145,7 @@ main () {
 }
 
 echo "usage: extract_mols.sh heavy_atom_start heavy_atom_end logp_start logp_end desired_type /path/to/output"
-echo "example usage: ./extract_mols.sh 11 13 M300 M300 db2 /home/limcaoco/tubro/ZINC_mirror/DOCK6_demo"
+echo "example usage: ./extract_mols.sh 11 13 M300 M300 db2 /home/limcaoco/tubro/ZINC_mirror/test_dir"
 
 HEAVY_ATOM_START=${1}
 HEAVY_ATOM_END=${2}
